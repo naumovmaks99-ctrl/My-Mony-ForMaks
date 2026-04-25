@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>Фінансовий трекер</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#5080d8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Трекер">
+
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;1,400&family=Nunito:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0; -webkit-tap-highlight-color: transparent;}
+:root{
+  --g50:#eef7f0;--g100:#cce8d4;--g200:#99d0a9;--g400:#4daa6a;--g600:#2d7a47;--g800:#164a28;
+  --r50:#fdf0f0;--r100:#f9cecd;--r200:#f29e9c;--r400:#e05756;--r600:#a83130;--r800:#6e1f1e;
+  --b50:#eef4fd;--b100:#c5d9f7;--b400:#5080d8;--b600:#2850a8;--b800:#112b60;
+  --a50:#fffbee;--a100:#fde8a0;--a400:#f5b800;--a600:#b88400;--a800:#7a5800;
+  --p50:#f3eefa;--p100:#dac8f5;--p400:#9060d8;--p600:#5c35a8;--p800:#2e1860;
+  --s50:#f5f6f8;--s100:#e3e6ec;--s200:#c7cdd8;--s400:#7a88a0;--s600:#4a5568;--s800:#1e2a3a;
+  --ink:#1e2a3a;--ink2:#4a5568;--ink3:#7a88a0;
+  --surf:#ffffff;--bg:#f0f2f5;--brd:#e3e6ec;
+  --R:20px;--Rs:12px;--Rx:8px;
+  --sh:0 2px 12px rgba(30,42,58,.07);--sh2:0 6px 28px rgba(30,42,58,.13);
+}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;padding-bottom:5rem; line-height: 1.5;}
+h1,h2,h3{font-family:'Fraunces',serif;font-weight:500}
+
+.app{max-width:880px;margin:0 auto;padding:1.5rem 1rem}
+header{text-align:center;padding:1.5rem 0 1.75rem}
+header h1{font-size:1.8rem;letter-spacing:-.3px}
+header p{color:var(--ink3);font-size:.83rem;margin-top:4px}
+
+/* TABS - Адаптація під пальці */
+.tabs{display:flex;gap:5px;background:var(--s100);border-radius:var(--R);padding:5px;margin-bottom:1.5rem; position: sticky; top: 10px; z-index: 100;}
+.tab{flex:1;padding:12px 4px;text-align:center;font-size:.85rem;font-weight:700;color:var(--ink2);border-radius:var(--Rs);cursor:pointer;border:none;background:none;transition:all .18s;font-family:'Nunito',sans-serif}
+.tab.on{background:var(--surf);color:var(--ink);box-shadow:var(--sh)}
+
+.page{display:none}.page.on{display:block}
+.card{background:var(--surf);border-radius:var(--R);padding:1.25rem 1.5rem;box-shadow:var(--sh);margin-bottom:1rem}
+
+/* METRICS */
+.dash-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-bottom:1rem}
+@media(max-width:580px){.dash-grid{grid-template-columns:1fr 1fr}}
+.metric{background:var(--surf);border-radius:var(--R);padding:1.1rem 1.2rem;box-shadow:var(--sh);position:relative;overflow:hidden}
+.metric::after{content:'';position:absolute;bottom:0;left:0;right:0;height:4px}
+.metric.actual::after{background:var(--g400)}.metric.forecast::after{background:var(--b400)}.metric.safe::after{background:var(--a400)}
+.mlbl{font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--ink3);margin-bottom:8px}
+.mval{font-family:'Fraunces',serif;font-size:1.6rem;font-weight:500;line-height:1}
+.metric.actual .mval{color:var(--g600)}.metric.forecast .mval{color:var(--b600)}.metric.safe .mval{color:var(--a600)}
+@media(max-width:580px){.metric:nth-child(3){grid-column:span 2}}
+
+/* WALLETS */
+.wallets-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.75rem;margin-bottom:1rem}
+.wallet-card{background:var(--surf);border-radius:var(--R);padding:1.2rem;box-shadow:var(--sh);position:relative;border:2px solid transparent}
+.wallet-card.negative{border-color:var(--r200);background:var(--r50)}
+.w-bal{font-family:'Fraunces',serif;font-size:1.5rem;font-weight:500;color:var(--g600); margin-top: 5px;}
+
+/* BUTTONS - Мобільні розміри */
+.btn{padding:12px 18px;border-radius:var(--Rs);font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;border:none;transition:all .15s; display: inline-flex; align-items: center; justify-content: center;}
+.btn:active{transform:scale(.95); opacity: 0.8;}
+.btn-g{background:var(--g400);color:#fff}.btn-r{background:var(--r400);color:#fff}
+.btn-b{background:var(--b400);color:#fff}.btn-p{background:var(--p400);color:#fff}
+.btn-gh{background:transparent;border:1.5px solid var(--brd);color:var(--ink2)}
+.btn-sm{padding:8px 14px;font-size:.8rem}
+
+/* TIMELINE */
+.tl-row{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--brd)}
+.tl-day{font-family:'Fraunces',serif;font-size:1.4rem;color:var(--ink)}
+
+/* TOAST */
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(100px);background:var(--ink);color:#fff;padding:12px 24px;border-radius:99px;font-size:.9rem;opacity:0;transition:all .3s;z-index:9999;white-space:nowrap}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* FORMS */
+input,select{padding:12px; border:1.5px solid var(--brd); border-radius:var(--Rx); width:100%; font-size: 1rem; -webkit-appearance: none;}
+
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <h1>Мій спокій</h1>
+  <p id="header-date">Сьогодні</p>
+</header>
+
+<div class="tabs">
+  <button class="tab on" onclick="goPage('dashboard')">Стан</button>
+  <button class="tab" onclick="goPage('timeline')">План</button>
+  <button class="tab" onclick="goPage('manage')">Дії</button>
+  <button class="tab" onclick="goPage('history')">Архів</button>
+</div>
+
+<div id="pg-dashboard" class="page on">
+  <div class="dash-grid">
+    <div class="metric actual"><div class="mlbl">На руках</div><div class="mval" id="dm-actual">0</div></div>
+    <div class="metric forecast"><div class="mlbl">Прогноз</div><div class="mval" id="dm-forecast">0</div></div>
+    <div class="metric safe"><div class="mlbl">Ліміт/день</div><div class="mval" id="dm-safe">0</div></div>
+  </div>
+  <div id="wallets-grid" class="wallets-grid"></div>
+  <div id="dash-alerts"></div>
+  
+  <div class="card">
+    <h3>Швидка операція</h3>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:15px;">
+        <button class="btn btn-g" onclick="swMTab('income'); goPage('manage')">+ Дохід</button>
+        <button class="btn btn-r" onclick="swMTab('expense'); goPage('manage')">- Витрата</button>
+    </div>
+  </div>
+</div>
+
+<div id="pg-timeline" class="page">
+  <div class="card">
+    <div id="tl-list" class="tl"></div>
+  </div>
+</div>
+
+<div id="pg-manage" class="page">
+  <div class="stabs">
+    <button class="stab on" id="st-wallets" onclick="swMTab('wallets')">Рахунки</button>
+    <button class="stab" id="st-income" onclick="swMTab('income')">+ План</button>
+    <button class="stab" id="st-expense" onclick="swMTab('expense')">- План</button>
+    <button class="stab" id="st-transfer" onclick="swMTab('transfer')">Переказ</button>
+  </div>
+
+  <div id="ms-wallets" class="card">
+    <input type="text" id="nw-name" placeholder="Назва (напр. Моно)"/>
+    <input type="number" id="nw-bal" placeholder="Сума" style="margin:10px 0"/>
+    <button class="btn btn-p" style="width:100%" onclick="addWallet()">Додати рахунок</button>
+    <div id="wallets-manage-list" style="margin-top:20px"></div>
+  </div>
+
+  <div id="ms-income" style="display:none" class="card">
+    <input type="text" id="pi-name" placeholder="Джерело доходу"/>
+    <input type="number" id="pi-amt" placeholder="Сума" style="margin:10px 0"/>
+    <input type="date" id="pi-date" style="margin-bottom:10px"/>
+    <button class="btn btn-g" style="width:100%" onclick="addPIncome()">Запланувати дохід</button>
+  </div>
+
+  <div id="ms-expense" style="display:none" class="card">
+    <input type="text" id="pe-name" placeholder="На що витрата?"/>
+    <input type="number" id="pe-amt" placeholder="Сума" style="margin:10px 0"/>
+    <input type="date" id="pe-date" style="margin-bottom:10px"/>
+    <button class="btn btn-r" style="width:100%" onclick="addPExpense()">Запланувати витрату</button>
+  </div>
+
+  <div id="ms-transfer" style="display:none" class="card">
+    <select id="xfr-from"></select>
+    <select id="xfr-to" style="margin:10px 0"></select>
+    <input type="number" id="xfr-amt" placeholder="Сума"/>
+    <button class="btn btn-b" style="width:100%; margin-top:10px" onclick="doTransfer()">Переказати</button>
+  </div>
+</div>
+
+<div id="pg-history" class="page">
+  <div class="card">
+    <div style="display:flex; gap:10px; margin-bottom:20px">
+        <button class="btn btn-gh btn-sm" onclick="exportData()">💾 Експорт</button>
+        <button class="btn btn-gh btn-sm" onclick="document.getElementById('importFile').click()">📂 Імпорт</button>
+        <input type="file" id="importFile" style="display:none" onchange="importData(event)">
+    </div>
+    <div id="history-list"></div>
+  </div>
+</div>
+
+</div>
+
+<div id="modal-wallet" class="modal-bg" onclick="if(event.target===this)closeModal('wallet')">
+  <div class="modal">
+    <h3 id="mw-title">Куди?</h3>
+    <select id="mw-select" style="margin:15px 0"></select>
+    <div id="mw-warn" style="display:none; color:red; font-size:0.8rem; margin-bottom:10px"></div>
+    <div class="modal-btns">
+      <button class="btn btn-gh" onclick="closeModal('wallet')">Скасувати</button>
+      <button class="btn btn-b" onclick="confirmWalletModal()">ОК</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast-el"></div>
+
+<script>
+// ОСНОВНА ЛОГІКА (ЗБЕРЕЖЕНА ТА ДОПОВНЕНА)
+const SK='ft_mobile_v1';
+let S=ls();
+let _mwCb=null;
+
+function ls(){
+    try {
+        const d=JSON.parse(localStorage.getItem(SK));
+        if(d) return d;
+    } catch(e){}
+    return {wallets:[{id:'w1',name:'Готівка',balance:0}], pIncomes:[], pExpenses:[], history:[]};
+}
+
+function save(){ localStorage.setItem(SK,JSON.stringify(S)); renderAll(); }
+
+// Експорт даних у файл
+function exportData() {
+    const dataStr = JSON.stringify(S);
+    const blob = new Blob([dataStr], {type: "application/json"});
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `finance_backup_${new Date().toISOString().slice(0,10)}.json`;
+    link.click();
+}
+
+// Імпорт даних з файлу
+function importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const imported = JSON.parse(e.target.result);
+            if(imported.wallets) {
+                S = imported;
+                save();
+                toast("Дані успішно імпортовано!");
+            }
+        } catch(err) {
+            toast("Помилка файлу");
+        }
+    };
+    reader.readAsText(file);
+}
+
+function renderAll(){
+    const today = new Date(); today.setHours(0,0,0,0);
+    document.getElementById('header-date').innerText = today.toLocaleDateString('uk-UA', {day:'numeric', month:'long'});
+    
+    const totalActual = S.wallets.reduce((s,w)=>s+w.balance,0);
+    const sumPI = S.pIncomes.reduce((s,i)=>s+i.amount,0);
+    const sumPE = S.pExpenses.reduce((s,i)=>s+i.amount,0);
+    
+    document.getElementById('dm-actual').innerText = fmt(totalActual);
+    document.getElementById('dm-forecast').innerText = fmt(totalActual + sumPI - sumPE);
+    
+    const eom = new Date(today.getFullYear(), today.getMonth()+1, 0);
+    const daysLeft = Math.max(1, Math.ceil((eom-today)/(864e5))+1);
+    const oblig = S.pExpenses.filter(e=>{const d=pd(e.date); return d && d<=eom;}).reduce((s,e)=>s+e.amount,0);
+    document.getElementById('dm-safe').innerText = fmt(Math.max(0, (totalActual - oblig)/daysLeft));
+
+    renderWallets();
+    renderTimeline(today);
+    renderHistory();
+    fillSelects();
+}
+
+function renderWallets(){
+    const grid = document.getElementById('wallets-grid');
+    grid.innerHTML = S.wallets.map(w => `
+        <div class="wallet-card ${w.balance < 0 ? 'negative' : ''}">
+            <div style="font-size:0.7rem; font-weight:700; color:var(--ink3)">${w.name.toUpperCase()}</div>
+            <div class="w-bal">${fmt(w.balance)}</div>
+        </div>
+    `).join('');
+}
+
+function renderTimeline(today){
+    const items = [
+        ...S.pIncomes.map((e,i)=>({...e, type:'inc', idx:i})),
+        ...S.pExpenses.map((e,i)=>({...e, type:'exp', idx:i}))
+    ].sort((a,b)=> (pd(a.date) - pd(b.date)));
+
+    const el = document.getElementById('tl-list');
+    if(!items.length) { el.innerHTML = "<p style='text-align:center; padding:20px; color:var(--ink3)'>Планів немає</p>"; return; }
+
+    el.innerHTML = items.map(item => {
+        const d = pd(item.date);
+        return `
+            <div class="tl-row">
+                <div style="width:45px; text-align:center">
+                    <div class="tl-day">${d.getDate()}</div>
+                    <div style="font-size:0.6rem; text-transform:uppercase">${d.toLocaleDateString('uk-UA',{month:'short'})}</div>
+                </div>
+                <div style="flex:1">
+                    <div style="font-weight:700; font-size:0.9rem">${item.name}</div>
+                    <div style="font-size:0.7rem; color:var(--ink3)">${item.type === 'inc' ? 'Очікується' : 'Дедлайн'}</div>
+                </div>
+                <div style="text-align:right">
+                    <div style="font-weight:700; color:${item.type==='inc'?'var(--g600)':'var(--r600)'}">${item.type==='inc'?'+':'-'}${fmt(item.amount)}</div>
+                    <button class="btn btn-gh btn-sm" style="margin-top:5px" onclick="${item.type==='inc'?'receiveIncome':'payExpense'}(${item.idx})">OK</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderHistory(){
+    const el = document.getElementById('history-list');
+    const h = [...S.history].reverse().slice(0,20);
+    el.innerHTML = h.map(r => `
+        <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--s100); font-size:0.85rem">
+            <div>
+                <div style="font-weight:600">${r.name}</div>
+                <div style="font-size:0.7rem; color:var(--ink3)">${r.date}</div>
+            </div>
+            <div style="font-weight:700; color:${r.amount>0?'var(--g600)':'var(--r600)'}">${r.amount>0?'+':''}${fmt(r.amount)}</div>
+        </div>
+    `).join('');
+}
+
+// Функції дій (спрощені)
+function addWallet(){
+    const n = document.getElementById('nw-name').value;
+    const b = parseFloat(document.getElementById('nw-bal').value) || 0;
+    if(!n) return toast("Назва?");
+    S.wallets.push({id: Date.now(), name: n, balance: b});
+    document.getElementById('nw-name').value=''; document.getElementById('nw-bal').value='';
+    save(); toast("Рахунок додано");
+}
+
+function receiveIncome(i){
+    const inc = S.pIncomes[i];
+    _mwCb = (wi) => {
+        S.wallets[wi].balance += inc.amount;
+        addHist(inc.name, inc.amount);
+        S.pIncomes.splice(i,1);
+        save(); closeModal('wallet');
+    };
+    openModal('wallet', `Куди зарахувати ${fmt(inc.amount)}?`);
+}
+
+function payExpense(i){
+    const exp = S.pExpenses[i];
+    _mwCb = (wi) => {
+        S.wallets[wi].balance -= exp.amount;
+        addHist(exp.name, -exp.amount);
+        S.pExpenses.splice(i,1);
+        save(); closeModal('wallet');
+    };
+    openModal('wallet', `Звідки списати ${fmt(exp.amount)}?`);
+}
+
+function addPIncome(){
+    const n=document.getElementById('pi-name').value, a=parseFloat(document.getElementById('pi-amt').value), d=document.getElementById('pi-date').value;
+    if(!n || !a || !d) return toast("Заповніть поля");
+    S.pIncomes.push({name:n, amount:a, date:d});
+    save(); toast("Заплановано");
+}
+
+function addPExpense(){
+    const n=document.getElementById('pe-name').value, a=parseFloat(document.getElementById('pe-amt').value), d=document.getElementById('pe-date').value;
+    if(!n || !a || !d) return toast("Заповніть поля");
+    S.pExpenses.push({name:n, amount:a, date:d});
+    save(); toast("Додано витрату");
+}
+
+function addHist(name, amount){
+    S.history.push({name, amount, date: new Date().toLocaleString('uk-UA', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'})});
+}
+
+function fillSelects(){
+    const opts = S.wallets.map((w,i)=>`<option value="${i}">${w.name}</option>`).join('');
+    ['xfr-from', 'xfr-to', 'mw-select'].forEach(id => document.getElementById(id).innerHTML = opts);
+}
+
+function goPage(p){
+    document.querySelectorAll('.page').forEach(pg=>pg.classList.remove('on'));
+    document.getElementById('pg-'+p).classList.add('on');
+    document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('on', ['dashboard','timeline','manage','history'][i]===p));
+}
+
+function swMTab(t){
+    ['wallets','income','expense','transfer'].forEach(s => {
+        document.getElementById('ms-'+s).style.display = s===t ? 'block' : 'none';
+        if(document.getElementById('st-'+s)) document.getElementById('st-'+s).classList.toggle('on', s===t);
+    });
+}
+
+function openModal(id, title){ 
+    document.getElementById('modal-'+id).classList.add('on'); 
+    if(title) document.getElementById('mw-title').innerText = title;
+}
+function closeModal(id){ document.getElementById('modal-'+id).classList.remove('on'); }
+function confirmWalletModal(){ const wi = document.getElementById('mw-select').value; if(_mwCb) _mwCb(wi); }
+
+function fmt(n){ return Math.round(n).toLocaleString() + ' ₴'; }
+function pd(s){ if(!s) return null; const b=s.split('-'); return new Date(b[0], b[1]-1, b[2]); }
+function toast(m){ const t=document.getElementById('toast-el'); t.innerText=m; t.classList.add('on'); setTimeout(()=>t.classList.remove('on'), 2000); }
+
+renderAll();
+</script>
+</body>
+</html>

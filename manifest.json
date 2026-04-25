@@ -1,0 +1,15 @@
+{
+  "name": "Мій Фінансовий Спокій",
+  "short_name": "Фінанси",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#f0f2f5",
+  "theme_color": "#5080d8",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/10433/10433048.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
