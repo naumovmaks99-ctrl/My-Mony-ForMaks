@@ -31,7 +31,6 @@ h1,h2,h3{font-family:'Fraunces',serif;font-weight:500}
 header{text-align:center;padding:1rem 0 1.5rem}
 header h1{font-size:1.8rem; color:var(--b600)}
 
-/* TABS */
 .tabs{display:flex;gap:5px;background:var(--s100);border-radius:var(--R);padding:5px;margin-bottom:1.5rem; position: sticky; top: 10px; z-index: 100; box-shadow: var(--sh);}
 .tab{flex:1;padding:12px 4px;text-align:center;font-size:.85rem;font-weight:700;color:var(--ink2);border-radius:var(--Rs);cursor:pointer;border:none;background:none;transition:0.2s;}
 .tab.on{background:var(--surf);color:var(--ink);box-shadow:var(--sh)}
@@ -39,7 +38,6 @@ header h1{font-size:1.8rem; color:var(--b600)}
 .page{display:none}.page.on{display:block}
 .card{background:var(--surf);border-radius:var(--R);padding:1.25rem;box-shadow:var(--sh);margin-bottom:1rem}
 
-/* METRICS */
 .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem}
 .metric{background:var(--surf);border-radius:var(--R);padding:1.1rem;box-shadow:var(--sh);position:relative;overflow:hidden}
 .metric::after{content:'';position:absolute;bottom:0;left:0;right:0;height:4px}
@@ -48,28 +46,26 @@ header h1{font-size:1.8rem; color:var(--b600)}
 .mval{font-family:'Fraunces',serif;font-size:1.5rem;font-weight:500;}
 .metric.full{grid-column: span 2;}
 
-/* ACTION GRID */
 .action-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .action-item{background:var(--surf); padding:20px; border-radius:var(--R); box-shadow:var(--sh); text-align:center; cursor:pointer; transition:0.2s;}
 .action-item:active{transform:scale(0.95); background:var(--s50)}
 .action-icon{font-size:1.8rem; margin-bottom:8px; display:block;}
 .action-label{font-weight:700; font-size:0.85rem; color:var(--ink)}
 
-/* WALLET MANAGE ITEM */
 .wallet-manage-item{display:flex; justify-content:space-between; align-items:center; padding:12px; background:var(--s50); border-radius:var(--Rx); margin-top:8px;}
 .w-m-info{display:flex; flex-direction:column;}
 .w-m-name{font-weight:700; font-size:0.9rem;}
 .w-m-bal{font-size:0.8rem; color:var(--ink3)}
 .w-m-btns{display:flex; gap:8px;}
 
-/* BUTTONS */
 .btn{padding:12px; border-radius:var(--Rx); font-weight:700; cursor:pointer; border:none; font-size:0.9rem;}
 .btn-b{background:var(--b400); color:#fff}
 .btn-gh{background:var(--s100); color:var(--ink2)}
 .btn-r-light{background:var(--r50); color:var(--r600); padding:6px 10px; font-size:0.75rem;}
 .btn-b-light{background:var(--b50); color:var(--b600); padding:6px 10px; font-size:0.75rem;}
 
-input, select{padding:12px; border:1.5px solid var(--brd); border-radius:var(--Rx); width:100%; font-size:1rem; margin-bottom:10px;}
+input, select{padding:12px; border:1.5px solid var(--brd); border-radius:var(--Rx); width:100%; font-size:1rem; margin-bottom:10px; outline:none;}
+input:focus{border-color:var(--b400)}
 
 .toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(100px);background:var(--ink);color:#fff;padding:12px 24px;border-radius:99px;opacity:0;transition:0.3s;z-index:9999;}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -102,63 +98,51 @@ input, select{padding:12px; border:1.5px solid var(--brd); border-radius:var(--R
     </div>
 
     <div id="pg-actions" class="page">
-        <div class="action-grid">
-            <div class="action-item" onclick="openAction('manage-wallets')">
-                <span class="action-icon">💳</span>
-                <span class="action-label">Рахунки</span>
-            </div>
-            <div class="action-item" onclick="openAction('transfer')">
-                <span class="action-icon">⇄</span>
-                <span class="action-label">Переказ</span>
-            </div>
-            <div class="action-item" onclick="openAction('add-income')">
-                <span class="action-icon">💰</span>
-                <span class="action-label">+ Дохід (план)</span>
-            </div>
-            <div class="action-item" onclick="openAction('add-expense')">
-                <span class="action-icon">📉</span>
-                <span class="action-label">- Витрата (план)</span>
-            </div>
+        <div class="action-grid" id="main-action-menu">
+            <div class="action-item" onclick="openSect('manage-wallets')"><span class="action-icon">💳</span><span class="action-label">Рахунки</span></div>
+            <div class="action-item" onclick="openSect('transfer')"><span class="action-icon">⇄</span><span class="action-label">Переказ</span></div>
+            <div class="action-item" onclick="openSect('add-income')"><span class="action-icon">💰</span><span class="action-label">+ Дохід</span></div>
+            <div class="action-item" onclick="openSect('add-expense')"><span class="action-icon">📉</span><span class="action-label">- Витрата</span></div>
         </div>
 
         <div id="sect-manage-wallets" style="display:none; margin-top:20px;" class="card">
-            <h3>Керування рахунками</h3>
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px"><h3>Рахунки</h3><button class="btn btn-gh btn-sm" onclick="closeSects()">✕</button></div>
             <input type="text" id="w-name" placeholder="Назва рахунку"/>
             <input type="number" id="w-bal" placeholder="Поточний баланс"/>
             <input type="hidden" id="w-edit-id" value=""/>
-            <button class="btn btn-b" style="width:100%" id="w-save-btn" onclick="saveWallet()">Додати / Оновити</button>
+            <button class="btn btn-b" style="width:100%" onclick="saveWallet()">Зберегти</button>
             <div id="wallets-manage-list" style="margin-top:15px;"></div>
         </div>
 
         <div id="sect-transfer" style="display:none; margin-top:20px;" class="card">
-            <h3>Переказ коштів</h3>
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px"><h3>Переказ</h3><button class="btn btn-gh btn-sm" onclick="closeSects()">✕</button></div>
             <select id="x-from"></select>
             <select id="x-to"></select>
-            <input type="number" id="x-amt" placeholder="Сума переказу"/>
-            <button class="btn btn-b" style="width:100%" onclick="doTransfer()">Виконати переказ</button>
+            <input type="number" id="x-amt" placeholder="Сума"/>
+            <button class="btn btn-b" style="width:100%" onclick="doTransfer()">Виконати</button>
         </div>
 
         <div id="sect-add-income" style="display:none; margin-top:20px;" class="card">
-            <h3>Запланувати дохід</h3>
-            <input type="text" id="pi-name" placeholder="Джерело"/>
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px"><h3>Новий дохід</h3><button class="btn btn-gh btn-sm" onclick="closeSects()">✕</button></div>
+            <input type="text" id="pi-name" placeholder="Джерело (напр. ФОП)"/>
             <input type="number" id="pi-amt" placeholder="Сума"/>
             <input type="date" id="pi-date"/>
-            <button class="btn btn-b" style="width:100%" onclick="addPlanned('inc')">Зберегти план</button>
+            <button class="btn btn-b" style="width:100%" onclick="addPlanned('pi')">Запланувати</button>
         </div>
 
         <div id="sect-add-expense" style="display:none; margin-top:20px;" class="card">
-            <h3>Запланувати витрату</h3>
-            <input type="text" id="pe-name" placeholder="На що"/>
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px"><h3>Нова витрата</h3><button class="btn btn-gh btn-sm" onclick="closeSects()">✕</button></div>
+            <input type="text" id="pe-name" placeholder="Назва (напр. Оренда)"/>
             <input type="number" id="pe-amt" placeholder="Сума"/>
             <input type="date" id="pe-date"/>
-            <button class="btn btn-b" style="width:100%" onclick="addPlanned('exp')">Зберегти план</button>
+            <button class="btn btn-b" style="width:100%" onclick="addPlanned('pe')">Запланувати</button>
         </div>
     </div>
 
     <div id="pg-history" class="page">
         <div class="card">
             <div style="display:flex; gap:10px; margin-bottom:15px">
-                <button class="btn btn-gh btn-sm" onclick="exportData()">💾 Бекап</button>
+                <button class="btn btn-gh btn-sm" onclick="exportData()">💾 Експорт</button>
                 <button class="btn btn-gh btn-sm" onclick="document.getElementById('impFile').click()">📂 Імпорт</button>
                 <input type="file" id="impFile" style="display:none" onchange="importData(event)">
             </div>
@@ -236,21 +220,17 @@ function saveWallet(){
     const n = document.getElementById('w-name').value;
     const b = parseFloat(document.getElementById('w-bal').value) || 0;
     const id = document.getElementById('w-edit-id').value;
-
-    if(!n) return toast("Вкажіть назву");
-
+    if(!n) return toast("Назва?");
     if(id){
         const w = S.wallets.find(x => x.id == id);
         w.name = n; w.balance = b;
         document.getElementById('w-edit-id').value = "";
-        toast("Рахунок оновлено");
     } else {
         S.wallets.push({id: Date.now(), name: n, balance: b});
-        toast("Рахунок створено");
     }
     document.getElementById('w-name').value = "";
     document.getElementById('w-bal').value = "";
-    save();
+    save(); toast("Збережено");
 }
 
 function editWallet(id){
@@ -262,51 +242,58 @@ function editWallet(id){
 }
 
 function deleteWallet(id){
-    if(S.wallets.length <= 1) return toast("Має бути хоча б один рахунок");
-    if(confirm("Видалити цей рахунок?")){
+    if(S.wallets.length <= 1) return toast("Останній рахунок!");
+    if(confirm("Видалити?")){
         S.wallets = S.wallets.filter(x => x.id != id);
         save();
-        toast("Рахунок видалено");
     }
 }
 
-function openAction(id){
+function openSect(id){
+    closeSects();
+    document.getElementById('main-action-menu').style.display = 'none';
+    document.getElementById('sect-'+id).style.display = 'block';
+}
+
+function closeSects(){
     ['manage-wallets', 'transfer', 'add-income', 'add-expense'].forEach(s => {
-        document.getElementById('sect-'+s).style.display = (id === s) ? 'block' : 'none';
+        document.getElementById('sect-'+s).style.display = 'none';
     });
+    document.getElementById('main-action-menu').style.display = 'grid';
 }
 
 function doTransfer(){
     const fIdx = document.getElementById('x-from').value;
     const tIdx = document.getElementById('x-to').value;
     const amt = parseFloat(document.getElementById('x-amt').value);
-    if(fIdx == tIdx) return toast("Оберіть різні рахунки");
-    if(!amt) return toast("Вкажіть суму");
-    
+    if(fIdx == tIdx || !amt) return toast("Перевірте дані");
     S.wallets[fIdx].balance -= amt;
     S.wallets[tIdx].balance += amt;
-    addHist(`Переказ: ${S.wallets[fIdx].name} → ${S.wallets[tIdx].name}`, 0); 
+    addHist(`Переказ: ${S.wallets[fIdx].name} → ${S.wallets[tIdx].name}`, 0);
     document.getElementById('x-amt').value = "";
-    save(); toast("Переказ успішний");
+    save(); toast("Готово");
 }
 
 function addPlanned(type){
-    const n = document.getElementById('p'+type+'-name').value;
-    const a = parseFloat(document.getElementById('p'+type+'-amt').value);
-    const d = document.getElementById('p'+type+'-date').value;
-    if(!n || !a || !d) return toast("Всі поля обов'язкові");
+    const n = document.getElementById(type + '-name').value;
+    const a = parseFloat(document.getElementById(type + '-amt').value);
+    const d = document.getElementById(type + '-date').value;
+    if(!n || isNaN(a) || !d) return toast("Заповніть усі поля");
+
+    const target = (type === 'pi') ? S.pIncomes : S.pExpenses;
+    target.push({id: Date.now(), name: n, amount: a, date: d});
     
-    const target = (type === 'inc') ? S.pIncomes : S.pExpenses;
-    target.push({name:n, amount:a, date:d});
-    document.getElementById('p'+type+'-name').value = "";
-    document.getElementById('p'+type+'-amt').value = "";
-    save(); toast("Заплановано!");
+    document.getElementById(type + '-name').value = "";
+    document.getElementById(type + '-amt').value = "";
+    document.getElementById(type + '-date').value = "";
+    
+    save(); toast("Заплановано");
 }
 
 function renderTimeline(today){
     const items = [
-        ...S.pIncomes.map((e,i)=>({...e, type:'inc', idx:i})),
-        ...S.pExpenses.map((e,i)=>({...e, type:'exp', idx:i}))
+        ...S.pIncomes.map((e,i)=>({...e, type:'pi', idx:i})),
+        ...S.pExpenses.map((e,i)=>({...e, type:'pe', idx:i}))
     ].sort((a,b)=> (pd(a.date) - pd(b.date)));
 
     const el = document.getElementById('tl-list');
@@ -321,10 +308,10 @@ function renderTimeline(today){
             </div>
             <div style="flex:1">
                 <div style="font-weight:700; font-size:0.85rem">${item.name}</div>
-                <div style="font-size:0.7rem; color:${item.type=='inc'?'var(--g600)':'var(--r600)'}">${item.type=='inc'?'Очікуємо дохід':'Треба сплатити'}</div>
+                <div style="font-size:0.7rem; color:${item.type=='pi'?'var(--g600)':'var(--r600)'}">${item.type=='pi'?'Очікуємо':'Сплачуємо'}</div>
             </div>
             <div style="text-align:right">
-                <div style="font-weight:700; font-size:0.9rem">${item.type=='inc'?'+':'-'}${fmt(item.amount)}</div>
+                <div style="font-weight:700; font-size:0.9rem">${item.type=='pi'?'+':'-'}${fmt(item.amount)}</div>
                 <button class="btn btn-b-light" onclick="executePlan('${item.type}', ${item.idx})">OK</button>
             </div>
         </div>`;
@@ -332,14 +319,12 @@ function renderTimeline(today){
 }
 
 function executePlan(type, idx){
-    const item = (type === 'inc') ? S.pIncomes[idx] : S.pExpenses[idx];
+    const item = (type === 'pi') ? S.pIncomes[idx] : S.pExpenses[idx];
     _cb = (wi) => {
         const w = S.wallets[wi];
-        if(type === 'inc') w.balance += item.amount;
-        else w.balance -= item.amount;
-        addHist(item.name, (type==='inc' ? item.amount : -item.amount));
-        if(type === 'inc') S.pIncomes.splice(idx, 1);
-        else S.pExpenses.splice(idx, 1);
+        if(type === 'pi') w.balance += item.amount; else w.balance -= item.amount;
+        addHist(item.name, (type==='pi' ? item.amount : -item.amount));
+        if(type === 'pi') S.pIncomes.splice(idx, 1); else S.pExpenses.splice(idx, 1);
         save(); closeModal();
     };
     document.getElementById('mw-title').innerText = item.name + ": " + fmt(item.amount);
